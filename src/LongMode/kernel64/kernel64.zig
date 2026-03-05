@@ -139,6 +139,8 @@ export fn kernel64_zig_main() noreturn {
     const val: bruh = .{ .f2 = 5, .field1 = 7 };
     stdio.printf("How are you {} {}\n", .{ 5, val });
 
+    debug.first_debug();
+
     // Never return
     while (true) {
         // asm volatile ("mov rax, 15");

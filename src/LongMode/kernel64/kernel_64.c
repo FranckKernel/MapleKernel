@@ -63,7 +63,8 @@ __attribute__((noinline)) void fill_screen(volatile uint32_t color)
 
 void kernel64_zig_main();
 
-void kernel64_main()
+extern uint64_t __debug_info_start;
+void			kernel64_main()
 {
 	com1_init();
 
@@ -71,7 +72,13 @@ void kernel64_main()
 	com1_write_c_MANGLED(x);
 	com1_write_c_MANGLED("Com1 write ro data\n");
 
-	fill_screen(0x000000);
+	uint32_t *data = &__debug_info_start;
+
+	uint32_t all_fs = *data;
+	uint64_t len	= *(data + 1);
+	fill_screen(len & 0xFFFF'FFFF);
+
+	// fill_screen(0x000000);
 
 	com1_write_c_MANGLED("Going to Zig! No More C\n");
 

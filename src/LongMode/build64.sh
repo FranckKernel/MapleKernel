@@ -216,6 +216,7 @@ remove_eh_frame_from_o() {
 	local obj_name="$2"
 
 	echo -e "\n\n"
+	echo "Removing eh_frame from .o"
 	echo "Current directory: $(pwd)"
 	echo "Library: $lib_path"
 	echo "Stripping .eh_frame from $obj_name ..."
@@ -234,6 +235,7 @@ remove_eh_frame_from_o() {
 
 	# Remove .eh_frame from the specific object
 	if [[ -f "$obj_name" ]]; then
+		chmod 666 "$obj_name"
 		objcopy --remove-section=.eh_frame "$obj_name"
 	else
 		echo "Warning: $obj_name not found inside $lib_path"
@@ -251,7 +253,8 @@ remove_eh_frame_from_o() {
 
 # ===== Call the function to remove .eh_frame from kernel64.o =====
 if [[ "$DEBUG_OR_RELEASE" == "debug" ]]; then
-	remove_eh_frame_from_o "$LIB_OUT_PATH" "kernel64.o"
+	# remove_eh_frame_from_o "$LIB_OUT_PATH" "kernel64.o"
+	objcopy --remove-section=.eh_frame "$LIB_OUT_PATH"
 	echo "Removed eh frame"
 
 fi

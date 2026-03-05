@@ -98,27 +98,27 @@ void set_64bit_page_table()
 	addr64 pdpt_addr = transform_address(&first_pdpt);
 	addr64 pd_addr_1 = transform_address(&first_page_directory);
 
-	main_pml4.entries[0].present	  = 1;
-	main_pml4.entries[0].read_write_not_ro	  = 1;
-	main_pml4.entries[0].address_mid  = pdpt_addr.address_mid; // This is just taking the address >> 12
-	main_pml4.entries[0].address_high = pdpt_addr.address_high;
+	main_pml4.entries[0].present		   = 1;
+	main_pml4.entries[0].read_write_not_ro = 1;
+	main_pml4.entries[0].address_mid	   = pdpt_addr.address_mid; // This is just taking the address >> 12
+	main_pml4.entries[0].address_high	   = pdpt_addr.address_high;
 	kprintf("Address mid = %h\n", main_pml4.entries[0].address_mid);
 
-	first_pdpt.entries[0].present	   = 1;
-	first_pdpt.entries[0].read_write_not_ro	   = 1;
-	first_pdpt.entries[0].address_mid  = pd_addr_1.address_mid;
-	first_pdpt.entries[0].address_high = pd_addr_1.address_high;
+	first_pdpt.entries[0].present			= 1;
+	first_pdpt.entries[0].read_write_not_ro = 1;
+	first_pdpt.entries[0].address_mid		= pd_addr_1.address_mid;
+	first_pdpt.entries[0].address_high		= pd_addr_1.address_high;
 
-	first_page_directory.entries[0].present		 = 1;
-	first_page_directory.entries[0].read_write_not_ro		 = 1;
-	first_page_directory.entries[0].page_size	 = 1;
-	first_page_directory.entries[0].address_mid	 = 0;
-	first_page_directory.entries[0].address_high = 0;
+	first_page_directory.entries[0].present			  = 1;
+	first_page_directory.entries[0].read_write_not_ro = 1;
+	first_page_directory.entries[0].page_size		  = 1;
+	first_page_directory.entries[0].address_mid		  = 0;
+	first_page_directory.entries[0].address_high	  = 0;
 
-	first_page_directory.entries[1].present					= 1;
-	first_page_directory.entries[1].read_write_not_ro		= 1;
-	first_page_directory.entries[1].page_size	= 1;
-	first_page_directory.entries[1].address_mid = (0x1000u * 512u) >> 12; // 12, not 21.
+	first_page_directory.entries[1].present			  = 1;
+	first_page_directory.entries[1].read_write_not_ro = 1;
+	first_page_directory.entries[1].page_size		  = 1;
+	first_page_directory.entries[1].address_mid		  = (0x1000u * 512u) >> 12; // 12, not 21.
 	// The location doesnt matter for whatever page size of level
 	first_page_directory.entries[1].address_high = 0;
 
@@ -566,7 +566,6 @@ bool			test_paging()
 	kprintf("pt_e = {present = %u, execute_disable = %u, read_write_not_ro = %u}\n", pt_e->present, pt_e->execute_disable,
 		pt_e->read_write_not_ro);
 
-
 	kprintf("\n");
 	uint64_t stack_addr2 = kernel64_size::STACK_TOP - 8;
 	// uint64_t stack_addr = 0xffffffff8000c000;
@@ -639,6 +638,29 @@ bool			test_paging()
 	// kprintf("\n");
 
 	// end of function
+
+	kprintf("\n\n=====Rodata End stuff======\n\n");
+
+	uint64_t rodata_end_addr = 0xffffffff8005a000;
+	kprintf("The __rodata_end address: low %h, high %h\n", rodata_end_addr);
+	kernel64_size::region_t rodata_end_region_type = kernel64_size::get_region_type(rodata_end_addr);
+	kprintf("The name of the region of __rodata_end: %s\n", kernel64_size::region_to_string(rodata_end_region_type));
+
+	struct verified_address rodata_end_phys = software_transform(rodata_end_addr);
+	if (rodata_end_phys.err)
+	{
+		kprintf("Error getting the physical address of : %h\n", rodata_end_addr);
+	}
+	else
+	{
+		kprintf("__rodata_end physical address: low %h\n", rodata_end_phys.address);
+	}
+
+	page_table_entry *pt_e_end = get_page_table_address(rodata_end_addr);
+	kprintf("pt_e = low: %h:8, high : %h:8\n", pt_e_end);
+	kprintf("pt_e = low: %b:32, high : %b:32\n", pt_e_end);
+	kprintf("pt_e = {present = %u, execute_disable = %u, read_write_not_ro = %u}\n", pt_e_end->present, pt_e_end->execute_disable,
+		pt_e_end->read_write_not_ro);
 	return true;
 }
 
@@ -663,14 +685,12 @@ constexpr tables_and_entries lround_up_div(uint16_t a, uint16_t b)
 	return {.full_tables = pages, .entries = entries};
 }
 
-
 int64_t simple_page_kernel64(uint32_t phys_address, uint64_t virtual_address, uint64_t size)
 {
 
 	uint32_t page_count = max_page_count;
 	kprintf("Page count = %u\n", page_count);
-	assert(size <= kernel64_size::MODULE_SIZE,
-		"must be same size?  header={ low: %u high: %u } | grub={ low:%u, high:%u}\n",
+	assert(size <= kernel64_size::MODULE_SIZE, "must be same size?  header={ low: %u high: %u } | grub={ low:%u, high:%u}\n",
 		kernel64_size::MODULE_SIZE, size);
 	// Maybe grub only gives one of these
 
@@ -694,11 +714,11 @@ int64_t simple_page_kernel64(uint32_t phys_address, uint64_t virtual_address, ui
 			if (i != 0)
 				pdpt_table_index++;
 
-			addr64 pdpt_addr								  = transform_address(&k64_pdpts[pdpt_table_index]);
-			main_pml4.entries[vas[i].pml4_index].present	  = 1;
+			addr64 pdpt_addr									   = transform_address(&k64_pdpts[pdpt_table_index]);
+			main_pml4.entries[vas[i].pml4_index].present		   = 1;
 			main_pml4.entries[vas[i].pml4_index].read_write_not_ro = 1;
-			main_pml4.entries[vas[i].pml4_index].address_mid  = pdpt_addr.address_mid;
-			main_pml4.entries[vas[i].pml4_index].address_high = pdpt_addr.address_high;
+			main_pml4.entries[vas[i].pml4_index].address_mid	   = pdpt_addr.address_mid;
+			main_pml4.entries[vas[i].pml4_index].address_high	   = pdpt_addr.address_high;
 
 			last_pml4_entry_index = vas[i].pml4_index;
 		}
@@ -707,11 +727,11 @@ int64_t simple_page_kernel64(uint32_t phys_address, uint64_t virtual_address, ui
 			if (i != 0)
 				pd_table_index++;
 
-			addr64 pd_addr														= transform_address(&k64_page_directories[pd_table_index]);
-			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].present		= 1;
-			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].read_write_not_ro		= 1;
-			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].address_mid	= pd_addr.address_mid;
-			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].address_high = pd_addr.address_high;
+			addr64 pd_addr												   = transform_address(&k64_page_directories[pd_table_index]);
+			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].present = 1;
+			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].read_write_not_ro = 1;
+			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].address_mid		 = pd_addr.address_mid;
+			k64_pdpts[pdpt_table_index].entries[vas[i].pdpt_index].address_high		 = pd_addr.address_high;
 
 			last_pdpt_entry_index = vas[i].pdpt_index;
 		}
@@ -724,11 +744,11 @@ int64_t simple_page_kernel64(uint32_t phys_address, uint64_t virtual_address, ui
 
 			// Take the address of the needed page table. (Each page table has 512 entry, which points to 512 page frame)
 			// The page directory entry points to page table base
-			addr64 pt_addr															  = transform_address(&k64_page_tables[pt_table_index]);
-			k64_page_directories[pd_table_index].entries[vas[i].pd_index].present	  = 1;
-			k64_page_directories[pd_table_index].entries[vas[i].pd_index].read_write_not_ro	  = 1;
-			k64_page_directories[pd_table_index].entries[vas[i].pd_index].address_mid = pt_addr.address_mid;
-			k64_page_directories[pd_table_index].entries[vas[i].pd_index].address_high = pt_addr.address_high;
+			addr64 pt_addr														  = transform_address(&k64_page_tables[pt_table_index]);
+			k64_page_directories[pd_table_index].entries[vas[i].pd_index].present = 1;
+			k64_page_directories[pd_table_index].entries[vas[i].pd_index].read_write_not_ro = 1;
+			k64_page_directories[pd_table_index].entries[vas[i].pd_index].address_mid		= pt_addr.address_mid;
+			k64_page_directories[pd_table_index].entries[vas[i].pd_index].address_high		= pt_addr.address_high;
 
 			last_pd_entry_index = vas[i].pd_index;
 		}
@@ -885,10 +905,10 @@ int64_t vmap_addresses(uint32_t phys_address, uint64_t virtual_address, uint64_t
 
 			addr64 pdpt_addr = transform_address(&fb_pdpts[pdpt_table_index]);
 			// now
-			main_pml4.entries[virtual_address_split.pml4_index].present		 = 1;
-			main_pml4.entries[virtual_address_split.pml4_index].read_write_not_ro		 = 1;
-			main_pml4.entries[virtual_address_split.pml4_index].address_mid	 = pdpt_addr.address_mid;
-			main_pml4.entries[virtual_address_split.pml4_index].address_high = pdpt_addr.address_high;
+			main_pml4.entries[virtual_address_split.pml4_index].present			  = 1;
+			main_pml4.entries[virtual_address_split.pml4_index].read_write_not_ro = 1;
+			main_pml4.entries[virtual_address_split.pml4_index].address_mid		  = pdpt_addr.address_mid;
+			main_pml4.entries[virtual_address_split.pml4_index].address_high	  = pdpt_addr.address_high;
 
 			last_pml4_entry_index = virtual_address_split.pml4_index;
 		}
@@ -898,10 +918,10 @@ int64_t vmap_addresses(uint32_t phys_address, uint64_t virtual_address, uint64_t
 				pd_table_index++;
 
 			addr64 pd_addr = transform_address(&fb_page_directories[pd_table_index]);
-			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].present	  = 1;
-			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].read_write_not_ro	  = 1;
-			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].address_mid  = pd_addr.address_mid;
-			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].address_high = pd_addr.address_high;
+			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].present		   = 1;
+			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].read_write_not_ro = 1;
+			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].address_mid	   = pd_addr.address_mid;
+			fb_pdpts[pdpt_table_index].entries[virtual_address_split.pdpt_index].address_high	   = pd_addr.address_high;
 			// now
 
 			last_pdpt_entry_index = virtual_address_split.pdpt_index;
@@ -916,10 +936,10 @@ int64_t vmap_addresses(uint32_t phys_address, uint64_t virtual_address, uint64_t
 			// Take the address of the needed page table. (Each page table has 512 entry, which points to 512 page frame)
 			// The page directory entry points to page table base
 			addr64 pt_addr = transform_address(&fb_page_tables[pt_table_index]);
-			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].present		 = 1;
-			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].read_write_not_ro		 = 1;
-			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].address_mid	 = pt_addr.address_mid;
-			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].address_high = pt_addr.address_high;
+			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].present			  = 1;
+			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].read_write_not_ro = 1;
+			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].address_mid		  = pt_addr.address_mid;
+			fb_page_directories[pd_table_index].entries[virtual_address_split.pd_index].address_high	  = pt_addr.address_high;
 
 			last_pd_entry_index = virtual_address_split.pd_index;
 		}

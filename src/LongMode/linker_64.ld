@@ -57,10 +57,10 @@ SECTIONS
         KEEP(*(.debug_info))
         __debug_info_end = .;
 
-		/* . = ALIGN(8); */
-		/*   __debug_abbrev_start = .; */
-  /*       KEEP(*(.debug_abbrev)) */
-  /*       __debug_abbrev_end = .; */
+		. = ALIGN(8);
+		  __debug_abbrev_start = .;
+        KEEP(*(.debug_abbrev))
+        __debug_abbrev_end = .;
 
 		. = ALIGN(8);
         __debug_str_start = .;
@@ -221,6 +221,7 @@ SECTIONS
     __text_start = ADDR(.text);
     __text_end = ADDR(.text) + SIZEOF(.text);
     __rodata_start = ADDR(.rodata);
+	__rodata_size = SIZEOF(.rodata);
     __rodata_end = ADDR(.rodata) + SIZEOF(.rodata);
     __data_start = ADDR(.data);
     __data_end = ADDR(.data) + SIZEOF(.data);
