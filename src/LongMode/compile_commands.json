@@ -2,7 +2,7 @@
   {
     "file": "./kernel64/kernel_64.c",
     "arguments": [
-      "clang",
+      "/usr/bin/clang",
       "-target",
       "x86_64-freestanding",
       "-std=gnu23",
@@ -14,22 +14,22 @@
       "-gdwarf64",
       "-fno-unwind-tables",
       "-fno-asynchronous-unwind-tables",
-      "-fno-PIC",
-      "-fno-PIE",
       "-DQEMU",
       "-c",
       "./kernel64/kernel_64.c",
       "-o",
       "../../build64/kernel_64_c.o",
-      "-I../ProtectedMode/LongModePrep/"
+      "-I../ProtectedMode/LongModePrep/",
+      "-I./stdio",
+      "-I./stdlib"
     ],
     "directory": "/home/francois/Documents/zzz__PersonalProjects/MapleKernel/src/LongMode",
     "output": "../../build64/kernel_64_c.o"
   },
   {
-    "file": "./kernel64/com1.c",
+    "file": "./stdlib/string_helper.c",
     "arguments": [
-      "clang",
+      "/usr/bin/clang",
       "-target",
       "x86_64-freestanding",
       "-std=gnu23",
@@ -41,8 +41,30 @@
       "-gdwarf64",
       "-fno-unwind-tables",
       "-fno-asynchronous-unwind-tables",
-      "-fno-PIC",
-      "-fno-PIE",
+      "-DQEMU",
+      "-c",
+      "./stdlib/string_helper.c",
+      "-o",
+      "../../build64/string_helper.o"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/MapleKernel/src/LongMode",
+    "output": "../../build64/string_helper.o"
+  },
+  {
+    "file": "./kernel64/com1.c",
+    "arguments": [
+      "/usr/bin/clang",
+      "-target",
+      "x86_64-freestanding",
+      "-std=gnu23",
+      "-ffreestanding",
+      "-mcmodel=kernel",
+      "-mno-red-zone",
+      "-fno-sanitize=undefined",
+      "-fdebug-types-section",
+      "-gdwarf64",
+      "-fno-unwind-tables",
+      "-fno-asynchronous-unwind-tables",
       "-DQEMU",
       "-c",
       "./kernel64/com1.c",
@@ -51,5 +73,32 @@
     ],
     "directory": "/home/francois/Documents/zzz__PersonalProjects/MapleKernel/src/LongMode",
     "output": "../../build64/com1.o"
+  },
+  {
+    "file": "./stdio/simple_print.c",
+    "arguments": [
+      "/usr/bin/clang",
+      "-target",
+      "x86_64-freestanding",
+      "-std=gnu23",
+      "-ffreestanding",
+      "-mcmodel=kernel",
+      "-mno-red-zone",
+      "-fno-sanitize=undefined",
+      "-fdebug-types-section",
+      "-gdwarf64",
+      "-fno-unwind-tables",
+      "-fno-asynchronous-unwind-tables",
+      "-DQEMU",
+      "-c",
+      "./stdio/simple_print.c",
+      "-o",
+      "../../build64/simple_print.o",
+      "-I./kernel64",
+      "-I./stdlib",
+      "-I./stdio"
+    ],
+    "directory": "/home/francois/Documents/zzz__PersonalProjects/MapleKernel/src/LongMode",
+    "output": "../../build64/simple_print.o"
   }
 ]

@@ -4,7 +4,6 @@ move_pid_to_workspace.py - Move a window to a specific workspace in Hyprland by 
 The original file is located at ~/.local/bin/move_pid_to_workspace.py
 """
 
-
 import argparse
 import json
 import subprocess
@@ -86,7 +85,12 @@ def move_window_to_workspace(window_addr: str, workspace: str) -> bool:
     if not window_addr.startswith("0x"):
         window_addr = f"0x{window_addr}"
 
-    cmd = ["hyprctl", "dispatch", "movetoworkspacesilent", f"{workspace},address:{window_addr}"]
+    print(f"Window address: {window_addr}")
+    cmd = [
+        "hyprctl",
+        "eval",
+        f'hl.dispatch(hl.dsp.window.move({{ workspace = {workspace}, window = "address:{window_addr}", follow = false }}))',
+    ]
     stdout, stderr, code = run_command(cmd)
 
     if code != 0:
@@ -146,6 +150,26 @@ def move_pid_to_workspace(pid: int, workspace: str, timeout: float = 5.0):
     # Move the window
     if not move_window_to_workspace(window_addr, workspace):
         sys.exit(1)
+
+
+def move_window_to_workspace_by_pid(pid: int, workspace: str) -> bool:
+    """
+    Move a window to a specific workspace, targeting it by PID.
+    workspace can be integer (2) or string with special workspace ("special:magic")
+    Note: This doesn't wait for the window to have appeared
+    """
+    verbose_print(f"Moving window with pid {pid} to workspace {workspace}")
+    cmd = [
+        "hyprctl",
+        "eval",
+        f'hl.dispatch(hl.dsp.window.move({{ workspace = {workspace}, window = "pid:{pid}", follow = false }}))',
+    ]
+    stdout, stderr, code = run_command(cmd)
+    if code != 0:
+        print(f"Error moving window: {stderr}", file=sys.stderr)
+        return False
+    print(f"Moved window with pid {pid} to workspace {workspace}")
+    return True
 
 
 if __name__ == "__main__":

@@ -1,54 +1,10 @@
 #include "com1.h"
 #include "framebuffer_shared.h"
+#include "simple_print.h"
+#include "string_helper.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-void *memmove(void *dest, const void *src, size_t n)
-{
-	unsigned char		*d = (unsigned char *)dest;
-	const unsigned char *s = (const unsigned char *)src;
-
-	if (d == s || n == 0)
-		return dest;
-
-	if (d < s)
-	{
-		// Copy forward (no overlap or src before dest)
-		for (size_t i = 0; i < n; i++)
-		{
-			d[i] = s[i];
-		}
-	}
-	else
-	{
-		// Copy backward (dest before src, overlapping)
-		for (size_t i = n; i > 0; i--)
-		{
-			d[i - 1] = s[i - 1];
-		}
-	}
-	return dest;
-}
-
-void *memcpy(void *dest, const void *src, size_t n)
-{
-	// memmove handles all cases correctly
-	return memmove(dest, src, n);
-}
-
-void *memset(void *dest, int value, size_t n)
-{
-	unsigned char *d   = (unsigned char *)dest;
-	unsigned char  val = (unsigned char)value;
-
-	for (size_t i = 0; i < n; i++)
-	{
-		d[i] = val;
-	}
-
-	return dest; // mimic standard memset return value
-}
 
 __attribute__((noinline)) void fill_screen(volatile uint32_t color)
 {
@@ -72,11 +28,10 @@ void			kernel64_main()
 	com1_write_c_MANGLED(x);
 	com1_write_c_MANGLED("Com1 write ro data\n");
 
-	uint32_t *data = &__debug_info_start;
-
-	uint32_t all_fs = *data;
-	uint64_t len	= *(data + 1);
-	fill_screen(len & 0xFFFF'FFFF);
+	uint32_t *unit_length_location = (uint32_t *)&__debug_info_start;
+	uint32_t  unit_length		   = *unit_length_location;
+	simple_printh("address", (uint64_t)unit_length_location);
+	simple_printu("unit length", unit_length);
 
 	// fill_screen(0x000000);
 

@@ -161,6 +161,8 @@ if [[ "$QEMU_OR_REAL_MACHINE" == "qemu" ]]; then
 fi
 
 KERNEL64="./kernel64"
+STDIO="./stdio"
+STDLIB="./stdlib"
 LONG_MODE_PREP32="../ProtectedMode/LongModePrep/"
 
 rm -f "$BUILD_DIR/"*.o
@@ -177,8 +179,10 @@ nasm "${NASM_FLAGS64[@]}" "$KERNEL64/kernel64_boot.asm" -o "$BUILD_DIR/kernel64_
 nasm "${NASM_FLAGS64[@]}" "$KERNEL64/guards.asm" -o "$BUILD_DIR/guard_pages.o"
 
 printf -- "\n\n====== Compiling the Entry C code ========\n\n"
-$ZIG_CC "${ZIG_C_FLAGS[@]}" -c "$KERNEL64/kernel_64.c" -o "$BUILD_DIR/kernel_64_c.o" "-I$LONG_MODE_PREP32"
+$ZIG_CC "${ZIG_C_FLAGS[@]}" -c "$KERNEL64/kernel_64.c" -o "$BUILD_DIR/kernel_64_c.o" "-I$LONG_MODE_PREP32" "-I$STDIO" "-I$STDLIB"
+$ZIG_CC "${ZIG_C_FLAGS[@]}" -c "$STDLIB/string_helper.c" -o "$BUILD_DIR/string_helper.o"
 $ZIG_CC "${ZIG_C_FLAGS[@]}" -c "$KERNEL64/com1.c" -o "$BUILD_DIR/com1.o"
+$ZIG_CC "${ZIG_C_FLAGS[@]}" -c "$STDIO/simple_print.c" -o "$BUILD_DIR/simple_print.o" "-I$KERNEL64" "-I$STDLIB" "-I$STDIO"
 
 # $ZIG_CC "${ZIG_C_FLAGS[@]}" -c "$KERNEL64/kernel64.zig" -o "$BUILD_DIR/kernel64_zig.o"
 # $ZIG_CC "${ZIG_C_FLAGS[@]}" -c "$KERNEL64/std_options.zig" -o "$BUILD_DIR/std_options.o"
@@ -311,31 +315,3 @@ objdump -D -h -M intel "$BUILD_DIR/kernel64.elf" >"$BUILD_DIR/kernel64.dump"
 
 printf -- "\n\n====== Copying ========\n\n"
 cp "$BUILD_DIR/kernel64.elf" "$ISO_DIR/boot/kernel64.elf"
-
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#

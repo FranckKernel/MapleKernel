@@ -34,7 +34,7 @@
 
 #include "acpi.h"
 
-GDT_ROOT *GDT16_ROOT = &GDT16_DESCRIPTOR;
+// GDT_ROOT *GDT16_ROOT = &GDT16_DESCRIPTOR;
 
 extern uint32_t stack_top;
 extern uint32_t stack_bottom;

@@ -46,15 +46,15 @@ extern var __debug_line_end: u8;
 extern var __debug_ranges_start: u8;
 extern var __debug_ranges_end: u8;
 
-extern const __debug_info_start: u32;
-extern var __debug_info_end: u32;
+extern const __debug_info_start: u8;
+extern var __debug_info_end: u8;
 
 pub fn first_debug() void {
     stdio.printf("\n====First Debug information test====\n", .{});
 
-    const a: *const u32 = &__debug_info_start;
+    const a: u64 = ((__debug_info_start));
     stdio.printf("address: {}\n", .{a});
-    stdio.printf("all fs: {}", .{a.*});
+    // stdio.printf("all fs: {}", .{a.*});
 
     // stdio.printf("size: {}\n", .{@sizeOf(dwarf.DebugInfoHeader)});
     // stdio.printf("align: {}\n", .{@alignOf(dwarf.DebugInfoHeader)});

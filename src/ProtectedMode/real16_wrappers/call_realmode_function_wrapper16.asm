@@ -48,7 +48,7 @@ call_real16_function:
 	mov eax, stack16_start
 	shr eax, 4
     mov ss, ax
-    mov esp, 0x4000
+    mov esp, 0x4000 ; 16KB
     
 	;================ Copying the arguments to the stack
 	mov [saved_sp16], sp                  ; save SP

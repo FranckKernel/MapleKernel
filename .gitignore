@@ -21,4 +21,5 @@ src/ProtectedMode/LongModePrep/kernel64_size.inc
 **/*.gdb_history
 **/.gdb_history
 
+**/.ccls-cache/*
 **/.zig-cache/*
