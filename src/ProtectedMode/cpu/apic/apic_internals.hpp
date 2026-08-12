@@ -338,9 +338,10 @@ enum type : uint8_t
 struct __attribute__((aligned(4))) lvt_register_min
 {
 	uint8_t			vector_number;
-	uint8_t			res : 7	  = 0;
-	enum mask::type mask : 1  = mask::enable; // ||| enable = unmasked. So regular interrupts can pass
-	uint16_t		res2 : 15 = 0;
+	uint8_t			res : 7	 = 0;
+	enum mask::type mask : 1 = mask::enable; // ||| enable = unmasked. When disabled, the LAPIC timer still runs,
+											 // but its interrupt won't reach the CPU, so the timer Interrupt Service Routine won't execute.
+	uint16_t res2 : 15 = 0;
 };
 
 struct __attribute__((aligned(4))) lvt_register_full
@@ -455,7 +456,24 @@ enum type : uint8_t
 	divide_by_1	  = 0b1011,
 };
 
+constexpr auto to_value(divide_configuration::type configuration) -> uint32_t
+{
+	switch (configuration)
+	{
+	case divide_configuration::divide_by_1: return 1;
+	case divide_configuration::divide_by_2: return 2;
+	case divide_configuration::divide_by_4: return 4;
+	case divide_configuration::divide_by_8: return 8;
+	case divide_configuration::divide_by_16: return 16;
+	case divide_configuration::divide_by_32: return 32;
+	case divide_configuration::divide_by_64: return 64;
+	case divide_configuration::divide_by_128: return 128;
+	}
+
+	__builtin_unreachable();
 }
+
+} // namespace divide_configuration
 
 struct divide_configuration_register
 {
@@ -521,7 +539,7 @@ class LapicRegisters
 	// ------------------------------------------------------------------
 	static constexpr std::mmio_ptr_wo<uint32_t> remote_read{lapic_address + static_cast<uintptr_t>(lapic_registers_offset::remote_read)};
 	static constexpr std::mmio_ptr<uint32_t>	logical_destination{
-		   lapic_address + static_cast<uintptr_t>(lapic_registers_offset::logical_destination)};
+		lapic_address + static_cast<uintptr_t>(lapic_registers_offset::logical_destination)};
 	static constexpr std::mmio_ptr<uint32_t> destination_format{
 		lapic_address + static_cast<uintptr_t>(lapic_registers_offset::destination_format)};
 	static constexpr std::mmio_ptr<spurious_interrupt_vector_register> spurious_interrupt_vector{

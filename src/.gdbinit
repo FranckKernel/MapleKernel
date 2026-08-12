@@ -1,16 +1,15 @@
 # define rk32
-# 	target remote :1234 
+#  	target remote :1234 
 # end
-#
+# #
 # define rk64
 # 	set architecture i386:x86-64
 # 	target remote :1234 
 # end
 #
-#
 # define activate_dashboard 
 # 	source /usr/share/gdb-dashboard/.gdbinit
-# end
+#  end
 
 define dc2 
 	continue 
