@@ -27,7 +27,7 @@ apic_wait_interrupt_handler_asm:
 	push eax
 	push ebx
 
-	call apic_wait_interrupt_handler
+	; call apic_wait_interrupt_handler
 
 	mov eax, fs:[0] ; get the core ID
 	mov [apic_wait_interrupt_handled + eax], 1

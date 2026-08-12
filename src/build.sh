@@ -175,12 +175,13 @@ else
 		sleep 1 # Give it time to die
 	fi
 
-	QEMU_CPU_FLAG=()
 	QEMU_SMP_FLAG=()
 
 	if ((CORE_COUNT > 1)); then
 		QEMU_SMP_FLAG+=("-smp" "$CORE_COUNT")
 	fi
+
+	QEMU_CPU_FLAG=()
 	CPU_MODEL=""
 	if [[ "$MACHINE_BITNESS" == "64" ]]; then
 		CPU_MODEL="host"
