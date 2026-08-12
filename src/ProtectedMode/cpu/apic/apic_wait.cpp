@@ -1,7 +1,6 @@
 #include "apic_timer_interrupt_handler.hpp"
 #include "apic_timers.hpp"
 #include "apic_wait.hpp"
-#include <cassert>
 
 // Wait and timer_interrupt_handler seems to be somewaht overlapping
 
@@ -85,8 +84,9 @@ void apic_wait::quick_wait(uint32_t count)
 
 void apic_wait::quick_wait_n_times(uint32_t count, uint32_t n)
 {
-	uint8_t core_id				  = apic::get_core_id_fast();
-	apic_wait_loop_count[core_id] = 0;
+	uint8_t core_id						 = apic::get_core_id_fast();
+	apic_wait_interrupt_handled[core_id] = false;
+	apic_wait_loop_count[core_id]		 = 0;
 	start_timer_count_periodic(apic_timer::handlers::apic_wait_interrupt, count);
 
 	while (apic_wait_loop_count[core_id] < n)
@@ -103,11 +103,11 @@ void apic_wait::wait_c(uint64_t count)
 	uint64_t number_of_full_waits = count / max_count;
 	uint32_t leftover_count		  = count % max_count;
 
-	constexpr bool fast = true;
+	constexpr bool fast = false;
 	if (fast)
 	{
 
-		quick_wait_n_times(count, number_of_full_waits);
+		quick_wait_n_times(max_count, number_of_full_waits);
 	}
 	else
 	{

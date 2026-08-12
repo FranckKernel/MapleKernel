@@ -31,9 +31,11 @@ apic_wait_interrupt_handler_asm:
 
 	mov eax, fs:[0] ; get the core ID
 	mov [apic_wait_interrupt_handled + eax], 1
-	mov ebx, [apic_wait_loop_count + eax*4] 
+
+	mov dword ebx, [apic_wait_loop_count + eax*4] 
 	add ebx, 1
-	mov [apic_wait_loop_count + eax*4], ebx
+	mov dword [apic_wait_loop_count + eax*4], ebx
+
 	mov dword [ EOI_MMIO_ADDR ], 0
 	; DWORD WRITE. Without it, it writes a byte. And the eoi isn't properly recieved
 
