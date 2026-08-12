@@ -15,13 +15,14 @@ extern "C" void application_core_main()
 
 	kprintf("First entry\n");
 	apic::init_lapic();
+
 	uint8_t core_id	  = apic::get_core_id();
 	uint8_t core_id_f = apic::get_core_id_fast();
-	kprintf("Core %u(%u) Reporting for duty!\n\n", core_id_f, core_id);
+	kprintf("Core (%u : Fast $fs method)(%u : apic method) Reporting for duty!\n\n", core_id_f, core_id);
 
 	uint16_t fs_value;
 	__asm__ volatile("mov %%fs, %0" : "=r"(fs_value));
-	kprintf("Core %u has  fs = 0x%hx\n", core_id_f, fs_value);
+	kprintf("Core %u has  fs = %h\n", core_id_f, fs_value);
 
 	multicore::entered_main[core_id_f] = true;
 
@@ -40,6 +41,7 @@ extern "C" void application_core_main()
 	idt_finalize();
 	// This core must load the idt too. And do sti, so it can recieve
 	kprintf("Core %u Entering main loop\n", core_id_f);
+	kprintf("\n\n=======================\n");
 	while (true)
 	{
 		// kprintf("Slave CPU,  core %u\n", core_id_f);

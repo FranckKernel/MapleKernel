@@ -1,6 +1,7 @@
 #include "apic.hpp"
 #include "apic_internals.hpp"
 #include "apic_io.hpp"
+#include "apic_wait.hpp"
 #include "assert.h"
 #include "cast.h"
 #include "cpuid.hpp"
@@ -146,7 +147,9 @@ enum apic::error apic::init_lapic()
 	// lint1 is for nmi, and i don't have any of them for now so, All is good
 
 	lapic.task_priority.write({
-		.task_priority_subclass = task_priority_subclass::default_, .task_priority = task_priority::all, .res = 0,
+		.task_priority_subclass = task_priority_subclass::default_,
+		.task_priority			= task_priority::all,
+		.res					= 0,
 		// Just write 0 there
 	});
 	return apic::error::none;
