@@ -103,7 +103,7 @@ void apic_wait::wait_c(uint64_t count)
 	uint64_t number_of_full_waits = count / max_count;
 	uint32_t leftover_count		  = count % max_count;
 
-	constexpr bool fast = false;
+	constexpr bool fast = true;
 	if (fast)
 	{
 

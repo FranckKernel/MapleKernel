@@ -229,8 +229,6 @@ int cpp_main(struct cpp_main_args args)
 
 	kprintf("\n\n================= Start of CPP Main =================\n\n");
 
-	kprintf("got here\n");
-
 	// apic::start_timer(8, 10000, apic::divide_configuration::divide_by_128, apic::timer_mode::repeat);
 	// this is an internal function.
 	// Shouldn't really be used for regular stuff
@@ -310,7 +308,7 @@ int cpp_main(struct cpp_main_args args)
 	}
 	terminal_writestring("\n====kernel cpp entering main loop====\n");
 
-	// apic_wait::wait(10);
+	apic_wait::wait(10);
 	terminal_writestring("\nAfter apic wait\n");
 
 	uint32_t prime1 = 4001;
