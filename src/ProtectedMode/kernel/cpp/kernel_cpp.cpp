@@ -16,6 +16,7 @@
 #include "apic_io.hpp"
 #include "apic_timer_interrupt_handler.hpp"
 #include "apic_timers.hpp"
+#include "apic_wait.hpp"
 #include "assert.h"
 #include "framebuffer.hpp"
 #include "madt.hpp"
@@ -148,7 +149,7 @@ void multicore_setup(void *rsdp_void)
 
 	// initiate the apic_io of this core.
 	apic_io::init_io_apic(irq_to_gsi);
-	IRQ_set_mask(0);
+	IRQ_set_mask(0); // This IRQ_set_mask applies only to the pic.
 	// We don't touch the pic
 	kprintf("Initiated io apic\n");
 	/* =============== APIC TIMER CALIBRATION ================== */
@@ -240,7 +241,8 @@ int cpp_main(struct cpp_main_args args)
 
 	terminal_writestring("\n====kernel cpp Checking if support long mode, then jumping to it====\n");
 	bool support_long_mode = longmode_prep::does_cpu_support_longmode();
-	if (support_long_mode)
+	bool go_to_long_mode   = false;
+	if (support_long_mode && go_to_long_mode)
 	{
 		longmode_prep::measure_kernel32();
 		longmode_prep::get_max_cpu_address();
@@ -307,6 +309,9 @@ int cpp_main(struct cpp_main_args args)
 		to_compatibility_mode();
 	}
 	terminal_writestring("\n====kernel cpp entering main loop====\n");
+
+	apic_wait::wait(10);
+	terminal_writestring("\nAfter apic wait\n");
 
 	uint32_t prime1 = 4001;
 	uint32_t prime2 = 12301;

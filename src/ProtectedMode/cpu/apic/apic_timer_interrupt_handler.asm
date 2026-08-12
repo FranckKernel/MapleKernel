@@ -2,6 +2,7 @@ BITS 32
 extern kprintf2
 extern apic_send_eoi
 extern apic_wait_interrupt_handled
+extern apic_wait_loop_count
 
 
 section .rodata
@@ -19,19 +20,26 @@ apic_IRQ equ 0
 %assign EOI_MMIO_ADDR LAPIC_BASE + EOI_OFFSET
 
 ; =================================================== apic HANDLER =======================================
-extern apic_interrupt_handler
+extern apic_wait_interrupt_handler 
 global apic_wait_interrupt_handler_asm
 apic_wait_interrupt_handler_asm:
 
 	push eax
+	push ebx
+
+	call apic_wait_interrupt_handler
 
 	mov eax, fs:[0] ; get the core ID
 	mov [apic_wait_interrupt_handled + eax], 1
+	mov ebx, [apic_wait_loop_count + eax*4] 
+	add ebx, 1
+	mov [apic_wait_loop_count + eax*4], ebx
 	mov dword [ EOI_MMIO_ADDR ], 0
 	; DWORD WRITE. Without it, it writes a byte. And the eoi isn't properly recieved
 
 
 
+	pop ebx
 	pop eax
 
 	iret
