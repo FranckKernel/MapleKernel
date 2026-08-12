@@ -105,6 +105,8 @@ void multicore_setup(void *rsdp_void)
 
 	runtime_core_count = parsed_madt.entry_counts.processor_local_apic;
 
+	// ==================================================== INITIATE APIC AND LAPIC ======================================================
+	// The proper order is indeed apic, lapic, apic io
 	apic::init_apic();
 	apic::init_lapic();
 
@@ -147,6 +149,7 @@ void multicore_setup(void *rsdp_void)
 	}
 	kprintf("\n");
 
+	// ==================================================== INITIATE APIC IO ======================================================
 	// initiate the apic_io of this core.
 	apic_io::init_io_apic(irq_to_gsi);
 	IRQ_set_mask(0); // This IRQ_set_mask applies only to the pic.
@@ -157,7 +160,8 @@ void multicore_setup(void *rsdp_void)
 	// Apic timers calibration using pit
 	uint32_t apic_freq = apic_timer::sync_apic_with_pit();
 	kprintf("Calibrated lapic timer. Frequency: %u\n", apic_freq);
-	/* =============== WAKING THE CORES ================== */
+
+	/* ===================================================== WAKING THE CORES ================== */
 	kprintf("\n\n");
 	// bool *core_is_active = (bool *)alloca(sizeof(bool) * runtime_core_count);
 	// memset(core_is_active, 0, runtime_core_count * sizeof(bool));
@@ -227,11 +231,7 @@ int cpp_main(struct cpp_main_args args)
 
 	kprintf("got here\n");
 
-	uint8_t core_id = apic_get_core_id();
-
 	// apic::start_timer(8, 10000, apic::divide_configuration::divide_by_128, apic::timer_mode::repeat);
-	apic_timer::start_timer(apic_timer::handlers::apic_wait_interrupt, 10000, apic::divide_configuration::divide_by_128,
-		apic::timer_mode::single_shot, apic::mask::enable);
 	// this is an internal function.
 	// Shouldn't really be used for regular stuff
 
@@ -310,7 +310,7 @@ int cpp_main(struct cpp_main_args args)
 	}
 	terminal_writestring("\n====kernel cpp entering main loop====\n");
 
-	apic_wait::wait(10);
+	// apic_wait::wait(10);
 	terminal_writestring("\nAfter apic wait\n");
 
 	uint32_t prime1 = 4001;
@@ -324,7 +324,8 @@ int cpp_main(struct cpp_main_args args)
 		// kernel main loop
 		cpp_event_loop();
 
-		pit::wait(1.f / 144.f);
+		apic_wait::wait(1.f / 144.f);
+		// pit::wait(1.f / 144.f);
 		prime1 *= prime2;
 		prime1 += prime2;
 		prime1 %= prime3;

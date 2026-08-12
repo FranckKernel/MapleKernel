@@ -7,6 +7,7 @@ QEMU_OR_REAL_MACHINE="${2:-qemu}"
 MACHINE_BITNESS="${3:-64}"
 MOVE_VM_WINDOW="${4:-move}"
 STOP_AT_ENTRY="${5:-false}"
+CORE_COUNT="${6:-12}"
 
 # If you have qemu full
 QEMU_FULL=false
@@ -175,6 +176,11 @@ else
 	fi
 
 	QEMU_CPU_FLAG=()
+	QEMU_SMP_FLAG=()
+
+	if ((CORE_COUNT > 1)); then
+		QEMU_SMP_FLAG+=("-smp" "$CORE_COUNT")
+	fi
 	CPU_MODEL=""
 	if [[ "$MACHINE_BITNESS" == "64" ]]; then
 		CPU_MODEL="host"
@@ -225,7 +231,7 @@ else
 		-no-reboot \
 		"${QEMU_DBG_FLAGS[@]}" \
 		"${DEBUG_LOG_OPTS[@]}" \
-		\
+		"${QEMU_SMP_FLAG[@]}" \
 		"${QEMU_CPU_FLAG[@]}" \
 		"${USE_VNC_FLAG[@]}" \
 		-serial stdio & # -smp 12 \
