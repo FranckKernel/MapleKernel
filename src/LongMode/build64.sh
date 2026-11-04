@@ -265,6 +265,7 @@ fi
 
 printf -- "\n\n====== Getting the '.o's and '.a's ========\n\n"
 # Library configuration
+
 LIBRARY_PATHS=(
 	# "$BUILD_DIR"
 	"$LIB_OUT_DIR"

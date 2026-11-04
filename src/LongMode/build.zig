@@ -67,7 +67,7 @@ pub fn build(b: *std.Build) void {
 
     // Add Zig-specific flags for kernel
     // kernel_lib.root_module.omit_frame_pointer = false;
-    if (optimize != .Debug) {
+    if (optimize != .debug) {
         kernel_lib.pie = false;
         kernel_lib.root_module.pic = false;
         kernel_lib.root_module.stack_check = false;
